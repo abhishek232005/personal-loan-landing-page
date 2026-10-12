@@ -88,7 +88,7 @@ Get-Content database\migrations\003_lead_requested_amount.sql | mysql -u <databa
 
 Set `CRM_DB_HOST`, `CRM_DB_PORT`, `CRM_DB_NAME`, `CRM_DB_USER`, and `CRM_DB_PASSWORD` in the private `backend/.env` for the custom CRM database. The CRM schema must include `customers`, `leads`, `lead_sources`, `business_id_sequences`, `users`, `user_roles`, and `roles`, with `customer` / `lead` sequence scopes. The worker creates or reactivates the `Personal Loan Landing Page` lead source and assigns each synced lead to the active Admin account `Kuvik Administrator`. It creates or updates one customer and one lead per application enquiry, retries transient failures, and reports enqueue status to the form. It does not copy PAN or send sales webhook notifications unless separately configured.
 
-New enquiries sync after form submission. A verified applicant who returns using the same mobile can update an existing pending/submitted enquiry; the CRM record is updated rather than duplicated. The one-time migration adds `requested_amount` because older app records did not persist it. An older enquiry must be resubmitted to provide its missing requested amount.
+New enquiries sync after form submission. A verified applicant who returns using the same mobile can update an existing enquiry while CRM delivery is still pending. After the CRM successfully receives the lead, the same mobile cannot submit another enquiry and receives an already-submitted message, preventing duplicate leads. The one-time migration adds `requested_amount` because older app records did not persist it. An older enquiry must be resubmitted to provide its missing requested amount.
 
 ## Application security and operations
 

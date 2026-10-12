@@ -35,6 +35,8 @@ import {
 } from "../middleware/index.js";
 
 const router = Router();
+const alreadySubmittedMessage =
+  "You have already submitted an enquiry with this mobile number. Our team has received it, so you do not need to log in again.";
 const otpSendWindowMs = 60 * 60 * 1000;
 const localOtpMode = config.sms.testMode || ["test", "http"].includes(config.sms.provider);
 const otpSendLimit = rateLimit({
@@ -60,6 +62,21 @@ const otpVerifyLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Too many verification attempts. Please try again later." },
 });
+
+async function hasCompletedCrmEnquiry(connection, mobileHash) {
+  if (!isCrmSyncConfigured()) return false;
+  const [rows] = await connection.execute(
+    `SELECT leads.id
+     FROM leads
+     JOIN crm_sync_outbox ON crm_sync_outbox.lead_id = leads.id
+     WHERE leads.mobile_hash = ?
+       AND crm_sync_outbox.sync_status IN ('synced', 'complete')
+     LIMIT 1 FOR UPDATE`,
+    [mobileHash],
+  );
+  return rows.length > 0;
+}
+
 router.get("/health", asyncHandler(async (_request, response) => {
   const requiredTables = [
     "otp_requests",
@@ -108,6 +125,10 @@ router.post("/otp/send", otpSendLimit, asyncHandler(async (request, response) =>
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+    if (await hasCompletedCrmEnquiry(connection, mobileHash)) {
+      await connection.commit();
+      return response.status(409).json({ error: alreadySubmittedMessage });
+    }
     await connection.execute(
       `INSERT IGNORE INTO otp_rate_limits
        (mobile_hash, window_started_at, request_count, last_sent_at)
@@ -261,6 +282,10 @@ router.post("/leads", requireLeadToken, asyncHandler(async (request, response) =
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+    if (await hasCompletedCrmEnquiry(connection, mobileHash)) {
+      await connection.commit();
+      return response.status(409).json({ error: alreadySubmittedMessage });
+    }
     const [existingRows] = await connection.execute(
       "SELECT id, status FROM leads WHERE mobile_hash = ? FOR UPDATE",
       [mobileHash],
