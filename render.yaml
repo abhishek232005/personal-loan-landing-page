@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: kuvik-loans-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: JWT_SECRET
+        sync: false
+      - key: DATA_ENCRYPTION_KEY
+        sync: false
+      - key: PHONE_HASH_SECRET
+        sync: false
+      - key: OTP_HASH_SECRET
+        sync: false
+      - key: SMS_PROVIDER
+        value: msg91
+      - key: SMS_API_URL
+        value: https://control.msg91.com/api/v5/otp
+      - key: SMS_API_TOKEN
+        sync: false
+      - key: SMS_TEMPLATE_ID
+        sync: false

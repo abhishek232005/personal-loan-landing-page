@@ -13,6 +13,17 @@ database/migrations/        Additive app-local migrations
 
 The backend uses `DB_*` for application data and `CRM_DB_*` for the custom CRM database. Enquiry data is encrypted in an application outbox, then synced to the CRM customer and lead tables. The frontend receives only `VITE_API_BASE_URL`; all database credentials and SMS secrets remain in `backend/.env`.
 
+## Deploy to Vercel and Render
+
+This repository deploys the personal-loan website and its intake API; it does not contain the internal CRM dashboard or an admin login. The API's `/api/admin/*` routes intentionally return 404.
+
+- **Vercel:** Import this repository and set the project Root Directory to `frontend`. The Vite build and `dist` output are declared in `frontend/vercel.json`. Set `VITE_API_BASE_URL` to the deployed Render API URL ending in `/api`, for example `https://<render-service>.onrender.com/api`.
+- **Render:** Create a Blueprint from the repository root using `render.yaml`. It defines the Node API service, production mode, proxy trust, and `/api/health` check. Set `CLIENT_ORIGIN` to the exact HTTPS Vercel origin (no path).
+- **MySQL:** Render does not provide a managed MySQL service. Use a production MySQL provider with TLS enabled, restrict network access to the Render service as supported by the provider, and create a least-privilege application user. Configure `DB_HOST`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` as private Render environment variables; keep `DB_SSL=true`. Apply `database/schema.sql` and both additive migrations (`002_crm_sync_outbox.sql` and `003_lead_requested_amount.sql`) before the service health check can pass.
+- **Secrets and OTP:** Set independent values for `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `PHONE_HASH_SECRET`, and `OTP_HASH_SECRET`; each must be at least 32 characters and the encryption key must be 64 hex characters. Configure `SMS_API_TOKEN` and `SMS_TEMPLATE_ID` with the approved production MSG91 credentials. Never put secrets in Vercel, source files, or client-side variables; the Vercel frontend only needs `VITE_API_BASE_URL`.
+
+The Render blueprint deliberately contains no passwords, tokens, database hostnames, or generated secrets. Set those values through the hosting provider's private environment-variable settings. The API health check verifies database readiness; do not test live OTP delivery with a customer's phone without consent. CRM sync variables are optional and can be added privately if this deployment should sync to the separately managed CRM database.
+
 ## Install and run
 
 Prerequisites: Node.js 20+, MySQL 8+, and an approved SMS API for live OTP delivery.
