@@ -43,12 +43,17 @@ const faqs = [
   {
     question: "Does submitting an enquiry guarantee loan approval?",
     answer:
-      "No. An enquiry is not a loan application approval or offer. A lender will assess your application, documents, credit profile and its own policies before making any decision.",
+      "No. Submitting an enquiry does not guarantee approval or disbursal. The lender will review your application, documents, income and credit profile against its eligibility criteria before making a decision.",
   },
   {
-    question: "What interest rate and fees will apply?",
+    question: "What personal loan amount and interest rate may be available?",
     answer:
-      "There is no single rate quoted on this page. The lender, annual interest rate, APR, fees, repayment schedule and other applicable terms must be shared with you in the lender's offer before you decide whether to proceed.",
+      "Kuvik Loans publishes personal-loan options up to ₹50 lakh and rates starting from 9.99% p.a. These are subject to lender, applicant and product eligibility; your actual rate, amount, APR, fees and repayment schedule will be confirmed by the lender in its offer.",
+  },
+  {
+    question: "What repayment tenure can I choose?",
+    answer:
+      "Repayment options may range from 12 to 84 months, depending on the lender and product. Review the available tenure, EMI and complete repayment terms in the lender's offer before deciding.",
   },
   {
     question: "Why do you verify my mobile number?",
@@ -56,14 +61,9 @@ const faqs = [
       "A one-time code helps confirm that you control the mobile number you provide. It expires after five minutes and is never shown back to you by our application.",
   },
   {
-    question: "Why do you ask for PAN and income details?",
+    question: "Which documents and details may be required?",
     answer:
-      "If you choose to continue, these details help our team understand your enquiry and may be needed by a lender for eligibility assessment. We request consent first and protect sensitive values in storage.",
-  },
-  {
-    question: "Can I use the EMI calculator as a loan quote?",
-    answer:
-      "No. It is an estimate using the values you enter and a standard reducing-balance formula. It excludes fees and taxes and does not represent an offer, approval or the exact amount a lender may charge.",
+      "Lenders may ask for identity and PAN details, income or employment information, and supporting documents such as salary slips or bank statements. Requirements differ by lender and applicant; share information only after reviewing the privacy notice and giving consent.",
   },
 ];
 
@@ -84,7 +84,7 @@ function SectionHeading({ eyebrow, title, text, centered = false }) {
 export default function LandingPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [amount, setAmount] = useState(500000);
+  const [amount, setAmount] = useState(200000);
   const [rate, setRate] = useState(12);
   const [months, setMonths] = useState(36);
   const emi = calculateEmi(amount, rate, months);
@@ -147,13 +147,13 @@ export default function LandingPage() {
             <div className="animate-in">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-2 text-xs font-medium text-white/85">
                 <span className="h-2 w-2 rounded-full bg-leaf" />
-                A clearer way to explore personal loans
+                Personal loan options up to ₹50 lakh*
               </span>
               <h1 className="mt-7 max-w-2xl text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[4.25rem]">
-                Big plans deserve a <span className="text-leaf">clearer</span> first step.
+                Personal Loans for Your Next <span className="text-leaf">Big Step.</span>
               </h1>
               <p className="mt-6 max-w-xl text-base leading-7 text-white/70 sm:text-lg sm:leading-8">
-                Tell us what you need. Our team can help you understand the next steps and explore personal loan options that may fit your situation.
+                Explore personal-loan options up to ₹50 lakh* with published rates starting from 9.99% p.a.* Estimate your EMI and get guidance from our team. Your actual loan amount, rate, tenure and approval depend on lender assessment and eligibility.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <button onClick={openForm} className="rounded-full bg-leaf px-7 py-4 text-sm font-bold text-forest transition hover:bg-[#c9ed7c]">
@@ -171,16 +171,16 @@ export default function LandingPage() {
 
             <div className="relative mx-auto w-full max-w-[460px]">
               <div className="absolute -left-5 top-16 hidden rounded-2xl border border-white/10 bg-white/10 p-4 text-xs backdrop-blur sm:block">
-                <span className="block text-white/60">Make a plan that feels right</span>
-                <span className="mt-1.5 flex items-center gap-2 font-semibold text-leaf"><Check size={14} /> Start with an estimate</span>
+                <span className="block text-white/60">Plan a personal loan with clarity</span>
+                <span className="mt-1.5 flex items-center gap-2 font-semibold text-leaf"><Check size={14} /> Begin with an EMI estimate</span>
               </div>
               <div className="rounded-[2rem] border border-white/15 bg-[#f7f7f1] p-5 text-forest shadow-2xl sm:p-7">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold">A quick EMI estimate</span>
+                  <span className="text-sm font-semibold">Personal loan EMI estimate</span>
                   <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-forest/60">Illustrative</span>
                 </div>
                 <div className="mt-7 rounded-2xl bg-white p-5">
-                  <span className="text-xs text-muted">Estimated monthly EMI</span>
+                  <span className="text-xs text-muted">Estimated monthly EMI</span> 
                   <div className="mt-1 flex items-baseline gap-2">
                     <span className="text-4xl font-semibold tracking-tight">{money.format(calculateEmi(500000, 12, 36))}</span>
                     <span className="text-xs text-muted">/ month</span>
@@ -204,33 +204,33 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <p className="mt-4 text-[10px] leading-4 text-muted">
-                  Illustration assumes 12% p.a. on a reducing balance. Not a Kuvik offer; actual lender terms, fees and eligibility vary.
+                  Illustration assumes 12% p.a. on a reducing balance. It is not a loan offer; actual lender rates, fees and eligibility vary.
                 </p>
               </div>
               <div className="absolute -bottom-6 -right-3 rounded-2xl bg-leaf px-4 py-3 text-xs font-bold text-forest shadow-lg sm:-right-7">
-                Start with what works for you <MoveUpRight className="ml-1 inline" size={14} />
+                Explore options that suit your needs <MoveUpRight className="ml-1 inline" size={14} />
               </div>
             </div>
           </div>
           <div className="mx-auto max-w-7xl px-5 pb-6 text-[10px] leading-4 text-white/45 sm:px-8">
-            Kuvik Loans is a brand name. Lender identity and all loan terms will be disclosed before any formal application or acceptance. Enquiry does not guarantee approval or disbursal.
+            Personal-loan options up to ₹50 lakh* and rates from 9.99% p.a.* are subject to lender and applicant eligibility. Lender identity and final terms will be shared before you proceed. An enquiry does not guarantee approval or disbursal.
           </div>
         </section>
 
         <section id="benefits" className="px-5 py-20 sm:px-8 sm:py-28">
           <div className="mx-auto max-w-7xl">
             <SectionHeading
-              eyebrow="A little more clarity"
-              title="A personal loan journey that puts you first."
-              text="Good decisions start with the right information. We make it easier to understand your options, one step at a time."
+              eyebrow="Why Kuvik Loans"
+              title="Explore personal loans with guidance at every step."
+              text="From estimating your EMI to understanding the next steps, our team helps make your personal-loan enquiry easier to navigate. The lender makes the final decision."
               centered
             />
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { icon: <Wallet />, title: "Plan before you apply", body: "Estimate a monthly repayment before sharing your details or deciding what to do next." },
-                { icon: <HeartHandshake />, title: "A human conversation", body: "Share a few details so our team can understand your enquiry and follow up with you." },
-                { icon: <BadgeCheck />, title: "Clear terms, first", body: "Review the lender, rate, fees and repayment conditions before choosing to proceed." },
-                { icon: <LockKeyhole />, title: "Your details matter", body: "We ask for your consent and use safeguards to protect the information you provide." },
+                { icon: <Wallet />, title: "Estimate your EMI", body: "Adjust the amount, illustrative rate and repayment period to explore a monthly estimate." },
+                { icon: <HeartHandshake />, title: "Guidance from our team", body: "Tell us about your needs and our team can help explain the enquiry and next steps." },
+                { icon: <BadgeCheck />, title: "Options up to ₹50 lakh*", body: "Explore personal-loan options, with eligibility and final terms decided by the lender." },
+                { icon: <LockKeyhole />, title: "Your details matter", body: "We request your consent and use safeguards to protect the information you provide." },
               ].map((item) => (
                 <article key={item.title} className="rounded-3xl border border-forest/10 bg-white p-6 transition hover:-translate-y-1 hover:shadow-soft">
                   <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#eff4e7] text-forest">{item.icon}</span>
@@ -246,9 +246,9 @@ export default function LandingPage() {
           <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-20">
             <div>
               <SectionHeading
-                eyebrow="Know your numbers"
-                title="An EMI estimate, on your terms."
-                text="Try different amounts, rates and repayment periods to see how the estimated monthly payment changes."
+                eyebrow="Personal loan EMI calculator"
+                title="Plan your monthly repayment."
+                text="Explore how the loan amount, illustrative interest rate and repayment period can affect your estimated personal-loan EMI."
               />
               <div className="mt-8 space-y-7">
                 <div>
@@ -294,7 +294,7 @@ export default function LandingPage() {
                 Talk to our team <ArrowRight className="ml-2 inline" size={16} />
               </button>
               <p className="mt-5 text-xs leading-5 text-white/55">
-                This estimate uses a standard monthly reducing-balance calculation and excludes fees and taxes. The selected rate is illustrative only; it is not a quote or a Kuvik Loans product rate. A lender will determine actual terms and eligibility.
+                This estimate uses a standard monthly reducing-balance calculation and excludes fees and taxes. The selected rate is illustrative, not a quote or guaranteed Kuvik Loans rate. A lender will determine the actual rate, terms and eligibility.
               </p>
             </div>
           </div>
@@ -309,10 +309,10 @@ export default function LandingPage() {
                 <div className="max-w-xs rounded-3xl bg-white p-6 shadow-soft">
                   <div className="flex items-center gap-3">
                     <span className="grid h-11 w-11 place-items-center rounded-2xl bg-forest text-leaf"><BriefcaseBusiness size={20} /></span>
-                    <div><p className="text-sm font-semibold text-forest">Your next step</p><p className="text-xs text-muted">Starts with a conversation</p></div>
+                    <div><p className="text-sm font-semibold text-forest">Your personal-loan enquiry</p><p className="text-xs text-muted">Start with a conversation</p></div>
                   </div>
                   <div className="mt-5 space-y-3">
-                    {["Understand your needs", "Explore available options", "Decide at your own pace"].map((step, index) => (
+                    {["Share what you need", "Understand possible options", "Review before you decide"].map((step, index) => (
                       <div key={step} className="flex items-center gap-3 text-xs text-forest/80"><span className="grid h-6 w-6 place-items-center rounded-full bg-[#eff4e7] text-[10px] font-bold">{index + 1}</span>{step}</div>
                     ))}
                   </div>
@@ -322,13 +322,13 @@ export default function LandingPage() {
             <div>
               <SectionHeading
                 eyebrow="About Kuvik Loans"
-                title="A helpful starting point for a considered decision."
-                text="We believe borrowing should begin with understanding, not pressure. Kuvik Loans helps you start a personal-loan enquiry, estimate repayments and speak with our team about what may happen next."
+                title="A clearer start to your personal-loan journey."
+                text="Explore personal-loan options up to ₹50 lakh*, use the EMI calculator and speak with our team about the next steps. A lender assesses every application and confirms the actual amount, rate and terms."
               />
               <div className="mt-7 space-y-4">
-                <p className="flex gap-3 text-sm leading-6 text-muted"><Check className="mt-1 shrink-0 text-emerald-800" size={17} /> Review the estimate and decide whether you want to share an enquiry.</p>
-                <p className="flex gap-3 text-sm leading-6 text-muted"><Check className="mt-1 shrink-0 text-emerald-800" size={17} /> A lender's decision depends on its assessment and policies.</p>
-                <p className="flex gap-3 text-sm leading-6 text-muted"><Check className="mt-1 shrink-0 text-emerald-800" size={17} /> You can review the actual lender and terms before making a commitment.</p>
+                <p className="flex gap-3 text-sm leading-6 text-muted"><Check className="mt-1 shrink-0 text-emerald-800" size={17} /> Explore an illustrative EMI before sharing an enquiry.</p>
+                <p className="flex gap-3 text-sm leading-6 text-muted"><Check className="mt-1 shrink-0 text-emerald-800" size={17} /> Lenders may consider income, employment, credit profile and documents.</p>
+                <p className="flex gap-3 text-sm leading-6 text-muted"><Check className="mt-1 shrink-0 text-emerald-800" size={17} /> Review the lender's rate, fees and repayment terms before accepting an offer.</p>
               </div>
               <button onClick={openForm} className="mt-8 rounded-full bg-forest px-6 py-3.5 text-sm font-semibold text-white hover:bg-emerald-950">
                 Start an enquiry <ArrowRight className="ml-2 inline" size={16} />
@@ -340,17 +340,17 @@ export default function LandingPage() {
         <section id="eligibility" className="bg-[#f8faf6] px-5 py-20 sm:px-8 sm:py-28">
           <div className="mx-auto max-w-7xl">
             <SectionHeading
-              eyebrow="Before you begin"
-              title="A few things a lender may consider."
-              text="Eligibility rules are set by each lender and can change. These are common factors—not Kuvik Loans requirements or a promise that an application will be approved."
+              eyebrow="Personal loan eligibility"
+              title="What a lender may consider."
+              text="Eligibility criteria vary by lender and product. Your age, income, employment, credit profile and documents may be assessed; meeting common criteria does not guarantee approval."
               centered
             />
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { icon: <BriefcaseBusiness />, title: "Employment & income", body: "Your work situation and ability to meet repayments." },
-                { icon: <Clock3 />, title: "Age & residency", body: "The lender's applicable age and residence criteria." },
-                { icon: <Banknote />, title: "Credit profile", body: "Credit history and other checks the lender may perform." },
-                { icon: <ShieldCheck />, title: "Documents", body: "Identity, PAN and income documents requested by the lender." },
+                { icon: <BriefcaseBusiness />, title: "Employment & income", body: "Your employment type, income and ability to repay the loan." },
+                { icon: <Clock3 />, title: "Age & location", body: "The lender's age, residence and serviceability criteria." },
+                { icon: <Banknote />, title: "Credit profile", body: "Your credit history, existing obligations and other lender checks." },
+                { icon: <ShieldCheck />, title: "Documents", body: "PAN, identity, income and other documents the lender requests." },
               ].map((item) => (
                 <article key={item.title} className="rounded-3xl bg-white p-6">
                   <span className="text-emerald-800">{item.icon}</span>
@@ -364,13 +364,13 @@ export default function LandingPage() {
 
         <section className="px-5 py-20 sm:px-8 sm:py-28">
           <div className="mx-auto max-w-7xl">
-            <SectionHeading eyebrow="Your enquiry, step by step" title="Four simple steps. Your decision, always." centered />
+            <SectionHeading eyebrow="Your personal-loan enquiry" title="Four steps to understand what comes next." centered />
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { number: "01", title: "Share your details", body: "Tell us how to reach you and verify your mobile number." },
-                { number: "02", title: "Complete your profile", body: "Share employment, income, city and PAN with your consent." },
-                { number: "03", title: "Speak with our team", body: "Our team reviews your enquiry and explains the next steps." },
-                { number: "04", title: "Review before deciding", body: "If an offer is available, review the lender and all terms before you choose." },
+                { number: "01", title: "Tell us how to reach you", body: "Share your contact details and verify your mobile number." },
+                { number: "02", title: "Share your profile", body: "With your consent, provide employment, income, city and PAN details." },
+                { number: "03", title: "Talk through next steps", body: "Our team will review your enquiry and guide you on what may happen next." },
+                { number: "04", title: "Review any offer", body: "The lender shares its decision and terms. Review them before choosing to proceed." },
               ].map((step, index) => (
                 <article key={step.number} className="relative rounded-3xl border border-forest/10 p-6">
                   <span className="text-sm font-bold tracking-widest text-emerald-800">{step.number}</span>
@@ -388,8 +388,8 @@ export default function LandingPage() {
             <div className="flex max-w-2xl gap-4">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-forest"><ShieldCheck size={23} /></span>
               <div>
-                <h2 className="text-xl font-semibold text-forest">A transparent first step.</h2>
-                <p className="mt-2 text-sm leading-6 text-muted">We won't promise approval. Before any formal application, you should know which lender is involved and have the opportunity to review the applicable terms.</p>
+                <h2 className="text-xl font-semibold text-forest">Clear information. Your decision.</h2>
+                <p className="mt-2 text-sm leading-6 text-muted">A personal-loan enquiry is not an approval. Before you proceed with any offer, review the lender, interest rate, fees and repayment terms.</p>
               </div>
             </div>
             <button onClick={openForm} className="shrink-0 rounded-full bg-forest px-6 py-3.5 text-sm font-semibold text-white">
@@ -401,9 +401,9 @@ export default function LandingPage() {
         <section id="faqs" className="bg-cream px-5 py-20 sm:px-8 sm:py-28">
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
             <SectionHeading
-              eyebrow="Good to know"
-              title="Questions worth asking."
-              text="A little clarity up front can make your next step feel a lot easier."
+              eyebrow="Personal loan FAQs"
+              title="Good to know before you apply."
+              text="Find answers about personal-loan amounts, rates, eligibility and the enquiry process."
             />
             <div className="divide-y divide-forest/10">
               {faqs.map((faq) => (
@@ -428,7 +428,7 @@ export default function LandingPage() {
                 <BrandLogo className="w-40 sm:w-44" />
               </a>
               <p className="mt-4 text-sm leading-6 text-white/75">
-                Kuvik Solutions — Your trusted financial partner for all types of loans and credit solutions.
+                Kuvik Loans helps customers explore personal-loan options with digital tools and guidance from our team.
               </p>
             </div>
             <div className="grid gap-7 sm:grid-cols-2 lg:gap-12">

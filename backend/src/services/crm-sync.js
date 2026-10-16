@@ -5,6 +5,8 @@ import pool from "../database/pool.js";
 import logger from "../logger.js";
 import { decrypt, encrypt } from "./security.js";
 
+const crmLeadSourceName = "Kuvik Loans";
+
 const crmPool = config.crm.user && config.crm.password
   ? mysql.createPool({
       host: config.crm.host,
@@ -68,26 +70,29 @@ async function allocateBusinessId(connection, scope, prefix) {
   return `${prefix}${String(sequenceValue).padStart(6, "0")}`;
 }
 
-async function upsertCrmLead(lead) {
-  if (!crmPool) {
+export async function upsertCrmLead(lead, databasePool = crmPool) {
+  if (!databasePool) {
     throw new Error("CRM database credentials are not configured.");
   }
-  const connection = await crmPool.getConnection();
+  const productName = "Personal Loan";
+  const crmSnapshot = { applicationLeadId: lead.leadId };
+  const connection = await databasePool.getConnection();
   try {
     await connection.beginTransaction();
     await connection.execute(
       `INSERT INTO lead_sources (id, name, status)
-       VALUES (?, 'Personal Loan Landing Page', 'active')
+       VALUES (?, ?, 'active')
        ON DUPLICATE KEY UPDATE status = 'active', deleted_at = NULL`,
-      [randomUUID()],
+      [randomUUID(), crmLeadSourceName],
     );
     const [sourceRows] = await connection.execute(
-      "SELECT id FROM lead_sources WHERE name = 'Personal Loan Landing Page' AND status = 'active' AND deleted_at IS NULL LIMIT 1",
+      "SELECT id FROM lead_sources WHERE name = ? AND status = 'active' AND deleted_at IS NULL LIMIT 1",
+      [crmLeadSourceName],
     );
     if (!sourceRows.length) {
-      throw new Error("The CRM could not create or activate the Personal Loan Landing Page lead source.");
+      throw new Error(`The CRM could not create or activate the ${crmLeadSourceName} lead source.`);
     }
-    const [assigneeRows] = await connection.execute(
+    const [adminRows] = await connection.execute(
       `SELECT DISTINCT u.id
        FROM users u
        JOIN user_roles ur ON ur.user_id = u.id
@@ -98,18 +103,21 @@ async function upsertCrmLead(lead) {
          AND r.status = 'active' AND r.deleted_at IS NULL
        LIMIT 2`,
     );
-    if (assigneeRows.length !== 1) {
+    if (adminRows.length !== 1) {
       throw new Error("The CRM must have exactly one active Admin user named Kuvik Administrator.");
     }
+    const adminUserId = adminRows[0].id;
     const [productRows] = await connection.execute(
-      "SELECT id FROM loan_products WHERE name = 'Personal Loan' AND status = 'active' AND deleted_at IS NULL LIMIT 1",
+      "SELECT id FROM loan_products WHERE name = ? AND status = 'active' AND deleted_at IS NULL LIMIT 1",
+      [productName],
     );
     if (!productRows.length) {
-      throw new Error("The CRM has no active Personal Loan product.");
+      throw new Error(`The CRM has no active ${productName} product.`);
     }
 
     const [existingRows] = await connection.execute(
       `SELECT customers.id AS customer_id, customers.deleted_at,
+         customers.created_by_user_id,
          leads.id AS crm_lead_id, leads.business_id AS lead_business_id
        FROM customers
        JOIN leads ON leads.customer_id = customers.id
@@ -125,7 +133,7 @@ async function upsertCrmLead(lead) {
         `UPDATE customers
          SET full_name = ?, mobile = ?, city = ?, employment_type = ?,
            monthly_income = ?, requested_loan_amount = ?, preferred_product_id = ?,
-           source_id = ?, intake_lead_id = ?
+           created_by_user_id = COALESCE(created_by_user_id, ?), intake_lead_id = ?
          WHERE id = ?`,
         [
           lead.name,
@@ -135,21 +143,19 @@ async function upsertCrmLead(lead) {
           lead.monthlyIncome,
           lead.requestedAmount,
           productRows[0].id,
-          sourceRows[0].id,
+          adminUserId,
           existingRows[0].crm_lead_id,
           existingRows[0].customer_id,
         ],
       );
       await connection.execute(
-        `UPDATE leads SET required_amount = ?, product_id = ?,
-         source_id = ?, assigned_to_id = ?,
+        `UPDATE leads SET required_amount = ?, product_id = ?, assigned_to_id = ?,
          snapshot = JSON_SET(COALESCE(snapshot, JSON_OBJECT()), '$.applicationLeadId', ?)
          WHERE id = ?`,
         [
           lead.requestedAmount,
           productRows[0].id,
-          sourceRows[0].id,
-          assigneeRows[0].id,
+          adminUserId,
           lead.leadId,
           existingRows[0].crm_lead_id,
         ],
@@ -164,7 +170,7 @@ async function upsertCrmLead(lead) {
         `UPDATE customers
          SET full_name = ?, mobile = ?, city = ?, employment_type = ?,
            monthly_income = ?, requested_loan_amount = ?, preferred_product_id = ?,
-           source_id = ?
+           created_by_user_id = COALESCE(created_by_user_id, ?)
          WHERE id = ?`,
         [
           lead.name,
@@ -174,7 +180,7 @@ async function upsertCrmLead(lead) {
           lead.monthlyIncome,
           lead.requestedAmount,
           productRows[0].id,
-          sourceRows[0].id,
+          adminUserId,
           customerId,
         ],
       );
@@ -183,8 +189,9 @@ async function upsertCrmLead(lead) {
       await connection.execute(
         `INSERT INTO customers
           (id, business_id, full_name, mobile, city, employment_type, monthly_income,
-           requested_loan_amount, lifecycle_status, source_id, preferred_product_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'NEW', ?, ?)`,
+           requested_loan_amount, lifecycle_status, source_id, preferred_product_id,
+           created_by_user_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'NEW', ?, ?, ?)`,
         [
           customerId,
           customerBusinessId,
@@ -196,6 +203,7 @@ async function upsertCrmLead(lead) {
           lead.requestedAmount,
           sourceRows[0].id,
           productRows[0].id,
+          adminUserId,
         ],
       );
     }
@@ -213,9 +221,9 @@ async function upsertCrmLead(lead) {
         customerId,
         sourceRows[0].id,
         productRows[0].id,
-        assigneeRows[0].id,
+        adminUserId,
         lead.requestedAmount,
-        JSON.stringify({ applicationLeadId: lead.leadId }),
+        JSON.stringify(crmSnapshot),
       ],
     );
     await connection.execute(
@@ -251,7 +259,7 @@ async function sendSalesNotification(lead, crmLeadBusinessId) {
       mobile: `+91${lead.mobile}`,
       requestedAmount: lead.requestedAmount,
       city: lead.city,
-      source: "Kuvik Loans landing page",
+      source: crmLeadSourceName,
     }),
     signal: AbortSignal.timeout(10000),
   });

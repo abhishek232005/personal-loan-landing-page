@@ -1,11 +1,11 @@
 # Kuvik Loans landing page
 
-Responsive Kuvik Loans personal-loan enquiry site with a dedicated About Us page at `/about-us`, built with React/Vite, Express, and MySQL-backed OTP/lead intake. Submitted enquiries are queued for the internal CRM dashboard; the public site has no admin login or dashboard.
+Responsive Kuvik Loans personal-loan enquiry site with dedicated About Us and privacy pages, built with React/Vite, Express, and MySQL-backed OTP/lead intake. Submitted enquiries are queued for the internal CRM dashboard when its integration is configured; the public site has no admin login or dashboard.
 
 ## Structure
 
 ```text
-frontend/                   React pages (landing, About Us, privacy), components, logo, Vite and public env
+frontend/                   React pages (personal loan, About Us, privacy), components, logo, Vite and public env
 backend/                    Express routes, controllers/services, private env
 database/schema.sql         Existing personal-loan application schema
 database/migrations/        Additive app-local migrations
@@ -77,7 +77,7 @@ The application schema in `database/schema.sql` creates/selects `kuvik_personal_
 Get-Content database\schema.sql | mysql -u <database-user> -p
 ```
 
-Confirm `backend/.env` `DB_NAME` matches the selected database and the runtime user can use it and read/write the OTP and lead tables. Apply the additive CRM outbox and requested-amount migrations once to the application database:
+Confirm `backend/.env` `DB_NAME` matches the selected database and the runtime user can use it and read/write the OTP and lead tables. Apply the additive migrations once to the application database:
 
 ```powershell
 Get-Content database\migrations\002_crm_sync_outbox.sql | mysql -u <database-user> -p kuvik_personal_loan
@@ -86,7 +86,7 @@ Get-Content database\migrations\003_lead_requested_amount.sql | mysql -u <databa
 
 ### CRM lead sync
 
-Set `CRM_DB_HOST`, `CRM_DB_PORT`, `CRM_DB_NAME`, `CRM_DB_USER`, and `CRM_DB_PASSWORD` in the private `backend/.env` for the custom CRM database. The CRM schema must include `customers`, `leads`, `lead_sources`, `business_id_sequences`, `users`, `user_roles`, and `roles`, with `customer` / `lead` sequence scopes. The worker creates or reactivates the `Personal Loan Landing Page` lead source and assigns each synced lead to the active Admin account `Kuvik Administrator`. It creates or updates one customer and one lead per application enquiry, retries transient failures, and reports enqueue status to the form. It does not copy PAN or send sales webhook notifications unless separately configured.
+Set `CRM_DB_HOST`, `CRM_DB_PORT`, `CRM_DB_NAME`, `CRM_DB_USER`, and `CRM_DB_PASSWORD` in the private `backend/.env` for the custom CRM database. The CRM schema must include `customers`, `leads`, `lead_sources`, `business_id_sequences`, `users`, `user_roles`, `roles`, and `loan_products`, with `customer` / `lead` sequence scopes and an active Personal Loan product. Personal Loan leads use product `Personal Loan` and source `Kuvik Loans`. The worker resolves the uniquely configured active Admin account `Kuvik Administrator`, assigns the CRM lead to that account, and writes its user ID to `customers.created_by_user_id` for a new customer. The worker uses the existing business-ID allocator, retries transient failures, and reports queue status to the form. Enqueued or pending does not mean CRM delivery has been confirmed. PAN is not copied to CRM; sales webhook notifications are sent only if separately configured.
 
 New enquiries sync after form submission. A verified applicant who returns using the same mobile can update an existing enquiry while CRM delivery is still pending. After the CRM successfully receives the lead, the same mobile cannot submit another enquiry and receives an already-submitted message, preventing duplicate leads. The one-time migration adds `requested_amount` because older app records did not persist it. An older enquiry must be resubmitted to provide its missing requested amount.
 

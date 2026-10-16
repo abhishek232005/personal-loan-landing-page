@@ -17,15 +17,15 @@ export default function PrivacyNotice() {
           <div className="mt-8 space-y-7 text-sm leading-6 text-muted">
             <section>
               <h2 className="font-semibold text-forest">Information you provide</h2>
-              <p className="mt-2">We collect your name, mobile number, employment type, monthly income, city and PAN when you choose to submit an enquiry. A verification code is sent to confirm access to your mobile number. Do not share that code with anyone.</p>
+              <p className="mt-2">For a personal-loan enquiry, we collect your name, mobile number, employment type, monthly income, city and PAN. A verification code is sent to confirm access to your mobile number. Do not share that code with anyone.</p>
             </section>
             <section>
               <h2 className="font-semibold text-forest">Why we use it</h2>
-              <p className="mt-2">Kuvik Solutions Pvt. Ltd. uses the details to verify your mobile number, record and respond to your enquiry in its internal customer-management system, and support follow-up about possible next steps. We do not treat an enquiry as consent to an unrelated marketing campaign. If a regulated lender is to receive your information, its identity and the applicable purpose must be explained before that sharing occurs.</p>
+              <p className="mt-2">Kuvik Solutions Pvt. Ltd. uses the details to verify your mobile number, record and respond to your enquiry, and support follow-up about possible next steps. Enquiry details are stored in the application database and are queued for the internal customer-management system when that integration is configured. We do not treat an enquiry as consent to an unrelated marketing campaign. If a lending partner is to receive your information, its identity and the applicable purpose must be explained before that sharing occurs.</p>
             </section>
             <section>
               <h2 className="font-semibold text-forest">Storage and security</h2>
-              <p className="mt-2">Mobile numbers and PAN are encrypted in the application database. Enquiry details other than PAN are also recorded in Kuvik's internal customer-management system for follow-up; PAN is not copied there. Access to lead records is authenticated and role-limited. No system can be guaranteed completely secure; the operator should maintain access controls, backups, retention rules and incident response procedures.</p>
+              <p className="mt-2">Mobile numbers and PAN are encrypted in the application database. Queued CRM payloads are encrypted, and PAN is not copied to the CRM integration. Access to lead records is authenticated and role-limited. No system can be guaranteed completely secure; the operator should maintain access controls, backups, retention rules and incident response procedures.</p>
             </section>
             <section>
               <h2 className="font-semibold text-forest">Retention and your choices</h2>

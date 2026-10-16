@@ -7,4 +7,3 @@ export default function App() {
   if (window.location.pathname === "/about-us") return <AboutUs />;
   return <LandingPage />;
 }
-

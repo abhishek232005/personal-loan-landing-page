@@ -222,3 +222,118 @@ test("queues CRM lead details encrypted and replaces stale queued payloads safel
     },
   );
 });
+
+test("syncs new CRM customers with the configured creator and Kuvik Loans source", async () => {
+  const { upsertCrmLead } = await import("../src/services/crm-sync.js");
+  const statements = [];
+  const sequenceValues = { customer: 0, lead: 0 };
+  let committed = false;
+  const connection = {
+    async beginTransaction() {},
+    async execute(sql, parameters = []) {
+      statements.push({ sql, parameters });
+      if (sql.includes("SELECT id FROM lead_sources")) {
+        return [[{ id: "test-source-id" }], []];
+      }
+      if (sql.includes("SELECT DISTINCT u.id")) {
+        return [[{ id: "test-configured-admin-user-id" }], []];
+      }
+      if (sql.includes("SELECT id FROM loan_products")) {
+        return [[{ id: "test-product-id" }], []];
+      }
+      if (sql.includes("SELECT customers.id AS customer_id")) {
+        return [[], []];
+      }
+      if (sql.includes("UPDATE business_id_sequences")) {
+        sequenceValues[parameters[0]] += 1;
+        return [{ affectedRows: 1 }, []];
+      }
+      if (sql.includes("SELECT `last_value`")) {
+        return [[{ last_value: sequenceValues[parameters[0]] }], []];
+      }
+      return [{ affectedRows: 1 }, []];
+    },
+    async commit() {
+      committed = true;
+    },
+    async rollback() {},
+    release() {},
+  };
+
+  const result = await upsertCrmLead({
+    leadId: "test-application-lead-id",
+    name: "Asha Kumar",
+    mobile: "9876543210",
+    employmentType: "salaried",
+    monthlyIncome: 50000,
+    city: "Jaipur",
+    requestedAmount: 500000,
+  }, {
+    async getConnection() {
+      return connection;
+    },
+  });
+
+  const sourceInsert = statements.find(({ sql }) => sql.includes("INSERT INTO lead_sources"));
+  const customerInsert = statements.find(({ sql }) => sql.includes("INSERT INTO customers"));
+  const leadInsert = statements.find(({ sql }) => sql.includes("INSERT INTO leads"));
+  assert.equal(sourceInsert.parameters[1], "Kuvik Loans");
+  assert.match(customerInsert.sql, /created_by_user_id/);
+  assert.equal(customerInsert.parameters[8], "test-source-id");
+  assert.equal(customerInsert.parameters[10], "test-configured-admin-user-id");
+  assert.equal(leadInsert.parameters[3], "test-source-id");
+  assert.equal(leadInsert.parameters[5], "test-configured-admin-user-id");
+  assert.equal(result, "KUV-LEAD-000001");
+  assert.equal(committed, true);
+});
+
+test("fills missing creator attribution without replacing an existing customer creator", async () => {
+  const { upsertCrmLead } = await import("../src/services/crm-sync.js");
+  const statements = [];
+  const connection = {
+    async beginTransaction() {},
+    async execute(sql, parameters = []) {
+      statements.push({ sql, parameters });
+      if (sql.includes("SELECT id FROM lead_sources")) {
+        return [[{ id: "test-source-id" }], []];
+      }
+      if (sql.includes("SELECT DISTINCT u.id")) {
+        return [[{ id: "test-configured-admin-user-id" }], []];
+      }
+      if (sql.includes("SELECT id FROM loan_products")) {
+        return [[{ id: "test-product-id" }], []];
+      }
+      if (sql.includes("SELECT customers.id AS customer_id")) {
+        return [[{
+          customer_id: "test-customer-id",
+          deleted_at: null,
+          crm_lead_id: "test-crm-lead-id",
+          lead_business_id: "KUV-LEAD-000042",
+        }], []];
+      }
+      return [{ affectedRows: 1 }, []];
+    },
+    async commit() {},
+    async rollback() {},
+    release() {},
+  };
+
+  await upsertCrmLead({
+    leadId: "test-application-lead-id",
+    name: "Asha Kumar",
+    mobile: "9876543210",
+    employmentType: "salaried",
+    monthlyIncome: 50000,
+    city: "Jaipur",
+    requestedAmount: 500000,
+  }, {
+    async getConnection() {
+      return connection;
+    },
+  });
+
+  const customerUpdate = statements.find(({ sql }) => sql.includes("UPDATE customers"));
+  assert.match(customerUpdate.sql, /created_by_user_id = COALESCE\(created_by_user_id, \?\)/);
+  assert.equal(customerUpdate.parameters.at(-3), "test-configured-admin-user-id");
+  assert.equal(customerUpdate.parameters.at(-1), "test-customer-id");
+});

@@ -29,6 +29,7 @@ export function createApp({ serveFrontend = true } = {}) {
   app.use(pinoHttp({
     logger,
     serializers: {
+
       req(request) {
         return {
           id: request.id,

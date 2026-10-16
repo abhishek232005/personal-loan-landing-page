@@ -38,7 +38,7 @@ function readAttribution() {
     if (entry) utm.set(key, entry);
   }
   let referrer;
-  if (document.referrer) {
+  if (document.referrer) { 
     try {
       const source = new URL(document.referrer);
       referrer = `${source.origin}${source.pathname}`.slice(0, 2048);
@@ -79,7 +79,6 @@ export default function LeadForm({ onClose, requestedAmount }) {
   const [otpRetryAfter, setOtpRetryAfter] = useState(0);
   const [otpRateLimitMessage, setOtpRateLimitMessage] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [crmSyncStatus, setCrmSyncStatus] = useState("disabled");
   const validName = /^[\p{L}\p{M} .'-]+$/u.test(form.name.trim()) && form.name.trim().length >= 2;
 
   useEffect(() => {
@@ -119,7 +118,7 @@ export default function LeadForm({ onClose, requestedAmount }) {
     } finally {
       setBusy(false);
     }
-  };
+  };  
 
   const verifyAndCreate = async (event) => {
     event.preventDefault();
@@ -158,14 +157,16 @@ export default function LeadForm({ onClose, requestedAmount }) {
         },
         leadToken,
       );
-      setCrmSyncStatus(result.crmSyncStatus);
+      if (result.status !== "submitted") {
+        throw new Error("We could not confirm your application submission. Please try again.");
+      }
       setSuccess(true);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
       setBusy(false);
     }
-  };
+  }; 
 
   const close = () => {
     if (!busy) onClose();
@@ -186,16 +187,23 @@ export default function LeadForm({ onClose, requestedAmount }) {
       >
         <button onClick={close} aria-label="Close application form" className="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full bg-forest/5 text-forest hover:bg-forest/10"><X size={18} /></button>
         {success ? (
-          <div className="py-9 text-center">
-            <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#eff4e7] text-emerald-800"><CheckCircle2 size={32} /></span>
-            <h2 id="application-title" className="mt-5 text-2xl font-semibold text-forest">Thanks, {form.name.split(" ")[0]}.</h2>
-            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted">
-              Your enquiry has been recorded.
-              {crmSyncStatus === "pending" && " It is queued to sync to Kuvik's internal CRM dashboard."}
-              {crmSyncStatus === "disabled" && " CRM sync is not configured, so the enquiry is only in the application database."}
-              {" "}This is not a loan approval or offer.
-            </p>
-            <button onClick={onClose} className="mt-7 rounded-full bg-forest px-7 py-3 text-sm font-semibold text-white">Done</button>
+          <div className="px-1 py-8 text-center sm:px-4 sm:py-10">
+            <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#eff4e7] text-emerald-800 ring-8 ring-[#eff4e7]/60">
+              <CheckCircle2 size={32} aria-hidden="true" />
+            </span>
+            <p className="mt-7 text-xs font-bold uppercase tracking-[0.18em] text-emerald-800">Application received</p>
+            <h2 id="application-title" className="mt-3 text-2xl font-semibold tracking-tight text-forest sm:text-3xl">
+              Thank You, {form.name.trim()}!
+            </h2>
+            <div className="mx-auto mt-5 max-w-md space-y-4 text-sm leading-6 text-muted sm:text-base sm:leading-7">
+              <p>Your personal loan application has been submitted successfully.</p>
+              <p>Our team will review your details, and a member of our team will contact you soon to guide you through the next steps.</p>
+            </div>
+            <div className="mx-auto mt-7 max-w-md border-t border-forest/10 pt-5 text-sm leading-6 text-forest">
+              <p>Warm regards,</p>
+              <p className="font-semibold">Team Kuvik Loans</p>
+            </div>
+            <button onClick={onClose} className="mt-8 w-full rounded-full bg-forest px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-forest/90 sm:w-auto">Done</button>
           </div>
         ) : (
           <>
