@@ -7,8 +7,8 @@ Responsive Kuvik Loans personal-loan enquiry site with dedicated About Us and pr
 ```text
 frontend/                   React pages (personal loan, About Us, privacy), components, logo, Vite and public env
 backend/                    Express routes, controllers/services, private env
-database/schema.sql         Existing personal-loan application schema
-database/migrations/        Additive app-local migrations
+backend/database/schema.sql         Existing personal-loan application schema
+backend/database/migrations/        Additive app-local migrations
 ```
 
 The backend uses `DB_*` for application data and `CRM_DB_*` for the custom CRM database. Enquiry data is encrypted in an application outbox, then synced to the CRM customer and lead tables. The frontend receives only `VITE_API_BASE_URL`; all database credentials and SMS secrets remain in `backend/.env`.
@@ -19,7 +19,7 @@ This repository deploys the personal-loan website and its intake API; it does no
 
 - **Vercel:** Import this repository and set the project Root Directory to `frontend`. The Vite build and `dist` output are declared in `frontend/vercel.json`. Set `VITE_API_BASE_URL` to the deployed Render API URL ending in `/api`, for example `https://<render-service>.onrender.com/api`.
 - **Render:** Create a Blueprint from the repository root using `render.yaml`. It defines the Node API service, production mode, proxy trust, and `/api/health` check. Set `CLIENT_ORIGIN` to the exact HTTPS Vercel origin (no path).
-- **MySQL:** Render does not provide a managed MySQL service. Use a production MySQL provider with TLS enabled, restrict network access to the Render service as supported by the provider, and create a least-privilege application user. Configure `DB_HOST`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` as private Render environment variables; keep `DB_SSL=true`. Apply `database/schema.sql` and both additive migrations (`002_crm_sync_outbox.sql` and `003_lead_requested_amount.sql`) before the service health check can pass.
+- **MySQL:** Render does not provide a managed MySQL service. Use a production MySQL provider with TLS enabled, restrict network access to the Render service as supported by the provider, and create a least-privilege application user. Configure `DB_HOST`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` as private Render environment variables; keep `DB_SSL=true`. Apply `backend/database/schema.sql` and both additive migrations (`backend/database/migrations/002_crm_sync_outbox.sql` and `backend/database/migrations/003_lead_requested_amount.sql`) before the service health check can pass. The Render service root is `backend`, so runtime health messages refer to these files as `database/...`.
 - **Secrets and OTP:** Set independent values for `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `PHONE_HASH_SECRET`, and `OTP_HASH_SECRET`; each must be at least 32 characters and the encryption key must be 64 hex characters. Configure `SMS_API_TOKEN` and `SMS_TEMPLATE_ID` with the approved production MSG91 credentials. Never put secrets in Vercel, source files, or client-side variables; the Vercel frontend only needs `VITE_API_BASE_URL`.
 
 The Render blueprint deliberately contains no passwords, tokens, database hostnames, or generated secrets. Set those values through the hosting provider's private environment-variable settings. The API health check verifies database readiness; do not test live OTP delivery with a customer's phone without consent. CRM sync variables are optional and can be added privately if this deployment should sync to the separately managed CRM database.
@@ -82,17 +82,17 @@ Creating an MSG91 account, approving the OTP template, and setting a real auth k
 
 ## App database
 
-The application schema in `database/schema.sql` creates/selects `kuvik_personal_loan`, matching the current local `DB_NAME`. Apply it once to initialize OTP and lead tables; its statements use `CREATE TABLE IF NOT EXISTS` and do not delete or replace existing rows. In MySQL Workbench, open and execute `database/schema.sql` as a script. Or use PowerShell with a MySQL client and an account authorized to create the database and tables:
+The application schema in `backend/database/schema.sql` creates/selects `kuvik_personal_loan`, matching the current local `DB_NAME`. Apply it once to initialize OTP and lead tables; its statements use `CREATE TABLE IF NOT EXISTS` and do not delete or replace existing rows. In MySQL Workbench, open and execute `backend/database/schema.sql` as a script. Or use PowerShell from the repository root with a MySQL client and an account authorized to create the database and tables:
 
 ```powershell
-Get-Content database\schema.sql | mysql -u <database-user> -p
+Get-Content backend\database\schema.sql | mysql -u <database-user> -p
 ```
 
 Confirm `backend/.env` `DB_NAME` matches the selected database and the runtime user can use it and read/write the OTP and lead tables. Apply the additive migrations once to the application database:
 
 ```powershell
-Get-Content database\migrations\002_crm_sync_outbox.sql | mysql -u <database-user> -p kuvik_personal_loan
-Get-Content database\migrations\003_lead_requested_amount.sql | mysql -u <database-user> -p kuvik_personal_loan
+Get-Content backend\database\migrations\002_crm_sync_outbox.sql | mysql -u <database-user> -p kuvik_personal_loan
+Get-Content backend\database\migrations\003_lead_requested_amount.sql | mysql -u <database-user> -p kuvik_personal_loan
 ```
 
 ### CRM lead sync

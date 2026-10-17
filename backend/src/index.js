@@ -105,8 +105,10 @@ async function start() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   start().catch((error) => {
-    console.error("Kuvik Loans API failed to start. Check the database connection and schema configuration.");
-    console.error(error.message);
-    process.exitCode = 1;
-  });
+  console.error("Kuvik Loans API failed to start.");
+  console.error("Error code:", error.code);
+  console.error("Error message:", error.message);
+  console.error("Error details:", error);
+  process.exitCode = 1;
+});
 }

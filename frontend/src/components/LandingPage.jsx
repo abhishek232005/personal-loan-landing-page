@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
-  ArrowDown,
   ArrowRight,
   BadgeCheck,
   Banknote,
   BriefcaseBusiness,
+  CalendarDays,
   Check,
   ChevronDown,
   CircleHelp,
@@ -13,10 +13,11 @@ import {
   IndianRupee,
   LockKeyhole,
   Menu,
-  MoveUpRight,
+  Percent,
   ShieldCheck,
   Wallet,
   X,
+  Zap,
 } from "lucide-react";
 import LeadForm from "./LeadForm.jsx";
 import BrandLogo from "./BrandLogo.jsx";
@@ -26,11 +27,6 @@ const money = new Intl.NumberFormat("en-IN", {
   currency: "INR",
   maximumFractionDigits: 0,
 });
-
-function formatAmount(value) {
-  if (value >= 100000) return `₹${(value / 100000).toFixed(value % 100000 ? 1 : 0)} lakh`;
-  return money.format(value);
-}
 
 function calculateEmi(principal, annualRate, months) {
   const monthlyRate = annualRate / 1200;
@@ -53,7 +49,7 @@ const faqs = [
   {
     question: "What repayment tenure can I choose?",
     answer:
-      "Repayment options may range from 12 to 84 months, depending on the lender and product. Review the available tenure, EMI and complete repayment terms in the lender's offer before deciding.",
+      "Repayment options may range from 6 to 60 months in this illustrative calculator; available tenures depend on the lender and product. Review the available tenure, EMI and complete repayment terms in the lender's offer before deciding.",
   },
   {
     question: "Why do you verify my mobile number?",
@@ -86,7 +82,7 @@ export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [amount, setAmount] = useState(200000);
   const [rate, setRate] = useState(12);
-  const [months, setMonths] = useState(36);
+  const [months, setMonths] = useState(60);
   const emi = calculateEmi(amount, rate, months);
 
   const openForm = () => {
@@ -105,7 +101,7 @@ export default function LandingPage() {
             <a className="transition hover:text-forest" href="#benefits">Why Kuvik Loans</a>
             <a className="transition hover:text-forest" href="#calculator">EMI calculator</a>
             <a className="transition hover:text-forest" href="#eligibility">Eligibility</a>
-            {/* <a className="transition hover:text-forest" href="#faqs">FAQs</a> */}
+            <a className="transition hover:text-forest" href="#faqs">FAQs</a>
             <a className="transition hover:text-forest" href="/about-us">About Us</a>
           </nav>
           <div className="hidden items-center gap-5 lg:flex">
@@ -140,79 +136,100 @@ export default function LandingPage() {
       </header>
 
       <main>
-        <section id="home" className="relative isolate bg-forest text-white">
-          <div className="hero-grid absolute inset-0 -z-10 opacity-50" />
-          <div className="absolute -right-36 -top-44 -z-10 h-[30rem] w-[30rem] rounded-full bg-emerald-700/20 blur-3xl" />
-          <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1fr_0.85fr] lg:gap-16 lg:py-28">
-            <div className="animate-in">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-2 text-xs font-medium text-white/85">
-                <span className="h-2 w-2 rounded-full bg-leaf" />
+        <section id="home" className="relative isolate overflow-hidden bg-[#f8fbf8] text-forest">
+          <div className="pointer-events-none absolute -left-40 top-8 -z-10 h-96 w-96 rounded-full bg-emerald-100/70 blur-3xl" />
+          <div className="pointer-events-none absolute -right-32 bottom-0 -z-10 h-96 w-96 rounded-full bg-lime-100/50 blur-3xl" />
+          <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-14 pt-10 sm:px-8 sm:pb-20 sm:pt-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10 lg:py-16">
+            <div className="animate-in relative z-10">
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white/85 px-3.5 py-2 text-xs font-semibold text-forest shadow-sm">
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-emerald-100 text-emerald-800"><IndianRupee size={13} /></span>
                 Personal loan options up to ₹50 lakh*
               </span>
-              <h1 className="mt-7 max-w-2xl text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[4.25rem]">
-                Personal Loans for Your Next <span className="text-leaf">Big Step.</span>
+              <h1 className="mt-6 max-w-2xl text-[2.25rem] font-bold leading-[1.06] tracking-[-0.045em] text-[#102b3a] sm:text-5xl lg:text-[3.65rem] xl:text-[4rem]">
+                Your goals.<br />
+                Our support.<br />
+                <span className="text-emerald-800">Personal loans</span>
+                <span className="block">up to ₹50 lakh*</span>
               </h1>
-              <p className="mt-6 max-w-xl text-base leading-7 text-white/70 sm:text-lg sm:leading-8">
-                Explore personal-loan options up to ₹50 lakh* with published rates starting from 9.99% p.a.* Estimate your EMI and get guidance from our team. Your actual loan amount, rate, tenure and approval depend on lender assessment and eligibility.
+              <p className="mt-5 max-w-xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
+                A clearer way to explore personal-loan options. Estimate your EMI, share your needs and get guidance from our team—while the lender reviews your eligibility and final terms.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <button onClick={openForm} className="rounded-full bg-leaf px-7 py-4 text-sm font-bold text-forest transition hover:bg-[#c9ed7c]">
+
+              <div className="mt-6 grid max-w-lg grid-cols-2 gap-x-4 gap-y-4 sm:gap-x-6">
+                {[
+                  { icon: <Zap size={18} />, title: "Quick application", detail: "A few simple steps" },
+                  { icon: <ShieldCheck size={18} />, title: "Secure process", detail: "Your details matter" },
+                  { icon: <CalendarDays size={18} />, title: "Flexible tenure", detail: "Options up to 60 months" },
+                  { icon: <Percent size={18} />, title: "Rates from 9.99%*", detail: "Subject to eligibility" },
+                ].map((benefit) => (
+                  <div key={benefit.title} className="flex items-start gap-2.5">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-100/80 text-emerald-800">{benefit.icon}</span>
+                    <span className="pt-0.5">
+                      <span className="block text-xs font-bold text-[#102b3a] sm:text-sm">{benefit.title}</span>
+                      <span className="mt-0.5 block text-[11px] text-slate-500 sm:text-xs">{benefit.detail}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <button onClick={openForm} className="min-h-12 rounded-full bg-emerald-900 px-7 py-3.5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(6,95,70,0.18)] transition hover:-translate-y-0.5 hover:bg-emerald-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800">
                   Apply now <ArrowRight className="ml-2 inline" size={17} />
                 </button>
-                <a href="#calculator" className="rounded-full border border-white/20 px-7 py-4 text-center text-sm font-semibold text-white transition hover:bg-white/10">
-                  Calculate your EMI <ArrowDown className="ml-2 inline" size={16} />
+                <a href="#calculator" className="min-h-12 rounded-full border border-forest/20 bg-white/70 px-6 py-3.5 text-center text-sm font-semibold text-forest transition hover:border-forest/40 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800">
+                  <IndianRupee className="mr-1 inline" size={16} /> Calculate your EMI <ArrowRight className="ml-1 inline" size={15} />
                 </a>
               </div>
-              <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-white/65">
-                <span className="flex items-center gap-2"><ShieldCheck size={15} className="text-leaf" /> Your details are protected</span>
-                <span className="flex items-center gap-2"><CircleHelp size={15} className="text-leaf" /> Enquiry is not an approval</span>
+              <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[11px] font-medium text-slate-600">
+                <span className="flex items-center gap-1.5"><ShieldCheck size={14} className="text-emerald-700" /> Your details are protected</span>
+                <span className="flex items-center gap-1.5"><CircleHelp size={14} className="text-emerald-700" /> Enquiry is not an approval</span>
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-[460px]">
-              <div className="absolute -left-5 top-16 hidden rounded-2xl border border-white/10 bg-white/10 p-4 text-xs backdrop-blur sm:block">
-                <span className="block text-white/60">Plan a personal loan with clarity</span>
-                <span className="mt-1.5 flex items-center gap-2 font-semibold text-leaf"><Check size={14} /> Begin with an EMI estimate</span>
-              </div>
-              <div className="rounded-[2rem] border border-white/15 bg-[#f7f7f1] p-5 text-forest shadow-2xl sm:p-7">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold">Personal loan EMI estimate</span>
-                  <span className="rounded-full bg-forest/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-forest/60">Illustrative</span>
+            <div className="relative mx-auto w-full max-w-[590px] py-3 sm:py-8">
+              <div className="relative min-h-[390px] overflow-hidden rounded-[2rem] border border-emerald-900/5 bg-gradient-to-br from-[#e9f5ed] via-[#dff0e5] to-[#d2e9dc] p-5 shadow-[0_28px_80px_rgba(16,44,42,0.12)] sm:min-h-[510px] sm:rounded-[2.5rem] sm:p-8 lg:min-h-[550px]">
+                <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full border-[1px] border-white/70 sm:h-96 sm:w-96" />
+                <div className="absolute -right-10 -top-14 h-52 w-52 rounded-full border-[1px] border-white/70 sm:h-72 sm:w-72" />
+                <div className="absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-[#c4e2d0]/70 blur-[1px]" />
+                <div className="absolute inset-0 opacity-35" aria-hidden="true" style={{ backgroundImage: "radial-gradient(#438568 0.7px, transparent 0.7px)", backgroundSize: "18px 18px" }} />
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-2 rounded-full border border-white/80 bg-white/75 px-3 py-2 text-[10px] font-semibold text-forest shadow-sm sm:text-xs">
+                    <ShieldCheck size={15} className="text-emerald-700" /> A clear, secure start
+                  </div>
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-forest text-leaf shadow-lg sm:h-12 sm:w-12"><IndianRupee size={21} /></span>
                 </div>
-                <div className="mt-7 rounded-2xl bg-white p-5">
-                  <span className="text-xs text-muted">Estimated monthly EMI</span> 
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <span className="text-4xl font-semibold tracking-tight">{money.format(calculateEmi(500000, 12, 36))}</span>
-                    <span className="text-xs text-muted">/ month</span>
+
+                <div className="relative mx-auto mt-8 max-w-[390px] rounded-[1.6rem] border border-white/80 bg-white/90 p-5 shadow-[0_24px_65px_rgba(16,44,42,0.16)] backdrop-blur-sm sm:mt-12 sm:p-7">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-emerald-800">Your loan snapshot</p>
+                      <h2 className="mt-1 text-base font-semibold text-[#102b3a] sm:text-lg">A plan that fits your pace</h2>
+                    </div>
+                    <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#eaf5ed] text-emerald-800"><Wallet size={19} /></span>
                   </div>
-                  <div className="mt-6 flex items-end gap-1.5" aria-hidden="true">
-                    {[28, 40, 33, 51, 45, 62, 55, 72, 61, 83, 70, 96, 78, 88, 72, 100].map((height, index) => (
-                      <div key={index} className="flex-1 rounded-full bg-emerald-900/10" style={{ height: `${height}px` }}>
-                        <div className="h-2/3 rounded-full bg-emerald-800" />
-                      </div>
-                    ))}
+                  <div className="mt-6 rounded-2xl bg-[#f3f8f4] p-4 sm:p-5">
+                    <p className="text-xs text-slate-500">Illustrative monthly EMI</p>
+                    <p className="mt-1 text-3xl font-bold tracking-tight text-[#102b3a] sm:text-4xl">{money.format(calculateEmi(500000, 12, 36))}<span className="ml-1 text-xs font-medium text-slate-500 sm:text-sm">/ month</span></p>
+                    <div className="mt-5 flex h-16 items-end gap-1.5" aria-hidden="true">
+                      {[27, 34, 31, 43, 39, 49, 45, 58, 52, 63, 58, 70, 64, 76].map((height, index) => <span key={index} className="flex-1 rounded-t-md bg-emerald-700/80" style={{ height: `${height}%` }} />)}
+                    </div>
+                    <div className="mt-2 flex justify-between text-[10px] text-slate-500"><span>Month 1</span><span>Month 60</span></div>
                   </div>
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl border border-forest/5 p-3"><p className="text-[10px] text-slate-500">Example amount</p><p className="mt-1 text-sm font-bold text-[#102b3a]">₹50 lakh</p></div>
+                    <div className="rounded-2xl border border-forest/5 p-3"><p className="text-[10px] text-slate-500">Example tenure</p><p className="mt-1 text-sm font-bold text-[#102b3a]">60 months</p></div>
+                  </div>
+                  <p className="mt-3 text-[9px] leading-4 text-slate-500">Illustration at 12% p.a. on a reducing balance. Actual rates, fees and eligibility vary by lender.</p>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-white p-4">
-                    <span className="text-xs text-muted">Loan amount</span>
-                    <p className="mt-1 font-semibold">{formatAmount(500000)}</p>
-                  </div>
-                  <div className="rounded-2xl bg-white p-4">
-                    <span className="text-xs text-muted">Tenure</span>
-                    <p className="mt-1 font-semibold">36 months</p>
-                  </div>
+
+                <div className="relative mx-auto mt-4 flex max-w-[390px] items-center gap-3 rounded-2xl border border-white/80 bg-white/75 px-4 py-3 shadow-sm backdrop-blur sm:absolute sm:bottom-7 sm:left-8 sm:mx-0 sm:mt-0">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-forest text-leaf"><Check size={18} /></span>
+                  <span><strong className="block text-xs text-forest">Know before you decide</strong><span className="mt-0.5 block text-[10px] text-slate-500">Review the lender's full terms and offer</span></span>
                 </div>
-                <p className="mt-4 text-[10px] leading-4 text-muted">
-                  Illustration assumes 12% p.a. on a reducing balance. It is not a loan offer; actual lender rates, fees and eligibility vary.
-                </p>
-              </div>
-              <div className="absolute -bottom-6 -right-3 rounded-2xl bg-leaf px-4 py-3 text-xs font-bold text-forest shadow-lg sm:-right-7">
-                Explore options that suit your needs <MoveUpRight className="ml-1 inline" size={14} />
               </div>
             </div>
           </div>
-          <div className="mx-auto max-w-7xl px-5 pb-6 text-[10px] leading-4 text-white/45 sm:px-8">
+          <div className="mx-auto max-w-7xl px-5 pb-5 text-[10px] leading-4 text-slate-500 sm:px-8">
             Personal-loan options up to ₹50 lakh* and rates from 9.99% p.a.* are subject to lender and applicant eligibility. Lender identity and final terms will be shared before you proceed. An enquiry does not guarantee approval or disbursal.
           </div>
         </section>
@@ -256,15 +273,15 @@ export default function LandingPage() {
                     <label htmlFor="amount" className="font-medium text-forest">Loan amount</label>
                     <span className="font-semibold text-forest">{money.format(amount)}</span>
                   </div>
-                  <input id="amount" className="range-slider w-full cursor-pointer" type="range" min="50000" max="2500000" step="25000" value={amount} onChange={(event) => setAmount(Number(event.target.value))} />
-                  <div className="mt-1 flex justify-between text-xs text-muted"><span>₹50,000</span><span>₹25,00,000</span></div>
+                  <input id="amount" aria-label="Loan amount" className="range-slider w-full cursor-pointer accent-emerald-800" type="range" min="50000" max="10000000" step="25000" value={amount} onChange={(event) => setAmount(Number(event.target.value))} />
+                  <div className="mt-1 flex justify-between text-xs text-muted"><span>₹50,000</span><span>₹1,00,00,000</span></div>
                 </div>
                 <div>
                   <div className="mb-3 flex justify-between text-sm">
                     <label htmlFor="rate" className="font-medium text-forest">Illustrative annual interest rate</label>
                     <span className="font-semibold text-forest">{rate}%</span>
                   </div>
-                  <input id="rate" className="range-slider w-full cursor-pointer" type="range" min="8" max="36" step="0.5" value={rate} onChange={(event) => setRate(Number(event.target.value))} />
+                  <input id="rate" aria-label="Illustrative annual interest rate" className="range-slider w-full cursor-pointer accent-emerald-800" type="range" min="8" max="36" step="0.5" value={rate} onChange={(event) => setRate(Number(event.target.value))} />
                   <div className="mt-1 flex justify-between text-xs text-muted"><span>8%</span><span>36%</span></div>
                 </div>
                 <div>
@@ -272,8 +289,8 @@ export default function LandingPage() {
                     <label htmlFor="tenure" className="font-medium text-forest">Repayment period</label>
                     <span className="font-semibold text-forest">{months} months</span>
                   </div>
-                  <input id="tenure" className="range-slider w-full cursor-pointer" type="range" min="6" max="60" step="1" value={months} onChange={(event) => setMonths(Number(event.target.value))} />
-                  <div className="mt-1 flex justify-between text-xs text-muted"><span>6 months</span><span>60 months</span></div>
+                  <input id="tenure" aria-label="Repayment period in months" className="range-slider w-full cursor-pointer accent-emerald-800" type="range" min="6" max="60" step="1" value={months} onChange={(event) => setMonths(Number(event.target.value))} />
+                  <div className="mt-1 flex justify-between text-xs text-muted"><span>6 months</span><span>5 years</span></div>
                 </div>
               </div>
             </div>

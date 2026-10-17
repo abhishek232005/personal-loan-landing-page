@@ -94,8 +94,8 @@ router.get("/health", asyncHandler(async (_request, response) => {
   const missingTables = requiredTables.filter((table) => !presentTables.has(table));
   if (missingTables.length) {
     const migration = missingTables.includes("crm_sync_outbox")
-      ? "database\\migrations\\002_crm_sync_outbox.sql"
-      : "database\\schema.sql";
+      ? "database/migrations/002_crm_sync_outbox.sql"
+      : "database/schema.sql";
     return response.status(503).json({
       status: "not_ready",
       error: `Required application tables are missing from database "${config.database.name}". Apply ${migration}, then retry.`,
@@ -108,7 +108,7 @@ router.get("/health", asyncHandler(async (_request, response) => {
   if (!requestedAmountColumns.length) {
     return response.status(503).json({
       status: "not_ready",
-      error: `Required lead fields are missing from database "${config.database.name}". Apply database\\migrations\\003_lead_requested_amount.sql, then retry.`,
+      error: `Required lead fields are missing from database "${config.database.name}". Apply database/migrations/003_lead_requested_amount.sql, then retry.`,
     });
   }
   response.json({ status: "ok" });

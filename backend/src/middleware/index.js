@@ -46,7 +46,7 @@ export function errorHandler(error, request, response, _next) {
     ["ER_NO_SUCH_TABLE", "ER_BAD_DB_ERROR", "ER_BAD_FIELD_ERROR"].includes(error.code)
   ) {
     return response.status(503).json({
-      error: `Required application tables are missing from database "${config.database.name}". Apply database\\schema.sql to that database, then retry.`,
+      error: `Required application tables are missing from database "${config.database.name}". Apply database/schema.sql to that database, then retry.`,
     });
   }
   if (
@@ -60,7 +60,7 @@ export function errorHandler(error, request, response, _next) {
     ].includes(error.code)
   ) {
     return response.status(503).json({
-      error: "The database is unavailable or the runtime account lacks required table permissions. Check backend/.env, apply database migrations and grants, then retry.",
+      error: "The database is unavailable or the runtime account lacks required table permissions. Check the API environment variables, apply database migrations and grants, then retry.",
     });
   }
   return response.status(500).json({ error: "Something went wrong. Please try again." });
